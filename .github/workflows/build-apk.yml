@@ -23,22 +23,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
       - name: Install Dependencies
         run: npm install
 
-      - name: Setup Android Project & Sync Capacitor
-        run: |
-          if [ ! -d "android" ]; then
-            npx cap add android
-          fi
-          npx cap sync android
+      - name: Add Android Platform
+        run: npx cap add android || true
 
-      - name: Set Android Permissions for Notifications
-        run: |
-          sed -i '/<application/i <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>' android/app/src/main/AndroidManifest.xml || true
-          sed -i '/<application/i <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>' android/app/src/main/AndroidManifest.xml || true
+      - name: Sync Capacitor
+        run: npx cap sync android
 
       - name: Grant Execute Permission for Gradle
         run: chmod +x android/gradlew
