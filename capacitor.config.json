@@ -1,8 +1,7 @@
 {
   "appId": "com.meowkas.app",
   "appName": "MeowKAS",
-  "webDir": ".",
-  "bundledWebRuntime": false,
+  "webDir": "www",
   "plugins": {
     "LocalNotifications": {
       "smallIcon": "ic_stat_icon_config_sample",
