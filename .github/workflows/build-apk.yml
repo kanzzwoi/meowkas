@@ -5,6 +5,9 @@ on:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,6 +38,35 @@ jobs:
       - name: Add Android Platform
         run: npx cap add android || true
 
+      - name: Apply App Icon & Splash
+        run: |
+          RES="android/app/src/main/res"
+          if [ -f "assets/icon.png" ]; then
+            convert assets/icon.png -resize 48x48 $RES/mipmap-mdpi/ic_launcher.png
+            convert assets/icon.png -resize 48x48 $RES/mipmap-mdpi/ic_launcher_round.png
+            convert assets/icon.png -resize 108x108 $RES/mipmap-mdpi/ic_launcher_foreground.png
+
+            convert assets/icon.png -resize 72x72 $RES/mipmap-hdpi/ic_launcher.png
+            convert assets/icon.png -resize 72x72 $RES/mipmap-hdpi/ic_launcher_round.png
+            convert assets/icon.png -resize 162x162 $RES/mipmap-hdpi/ic_launcher_foreground.png
+
+            convert assets/icon.png -resize 96x96 $RES/mipmap-xhdpi/ic_launcher.png
+            convert assets/icon.png -resize 96x96 $RES/mipmap-xhdpi/ic_launcher_round.png
+            convert assets/icon.png -resize 216x216 $RES/mipmap-xhdpi/ic_launcher_foreground.png
+
+            convert assets/icon.png -resize 144x144 $RES/mipmap-xxhdpi/ic_launcher.png
+            convert assets/icon.png -resize 144x144 $RES/mipmap-xxhdpi/ic_launcher_round.png
+            convert assets/icon.png -resize 324x324 $RES/mipmap-xxhdpi/ic_launcher_foreground.png
+
+            convert assets/icon.png -resize 192x192 $RES/mipmap-xxxhdpi/ic_launcher.png
+            convert assets/icon.png -resize 192x192 $RES/mipmap-xxxhdpi/ic_launcher_round.png
+            convert assets/icon.png -resize 432x432 $RES/mipmap-xxxhdpi/ic_launcher_foreground.png
+          fi
+          if [ -f "assets/splash.png" ]; then
+            mkdir -p $RES/drawable
+            convert assets/splash.png $RES/drawable/splash.png || true
+          fi
+
       - name: Sync Capacitor
         run: npx cap sync android
 
@@ -46,8 +78,9 @@ jobs:
           cd android
           ./gradlew assembleDebug
 
-      - name: Upload Artifact APK
-        uses: actions/upload-artifact@v4
+      - name: Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
         with:
-          name: MeowKAS-Debug-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          tag_name: v1.0.0-build${{ github.run_number }}
+          name: MeowKAS Build ${{ github.run_number }}
+          files: android/app/build/outputs/apk/debug/app-debug.apk
